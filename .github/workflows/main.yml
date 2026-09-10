@@ -1,1 +1,55 @@
+name: CxFlow CxSAST + CxSCA Scan
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
 
+jobs:
+  cxflow-scan:
+    runs-on: self-hosted
+    permissions:
+      contents: read
+      pull-requests: write
+      security-events: write
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkmarx CxFlow Action
+        uses: checkmarx-ts/checkmarx-cxflow-github-action@v2.3
+        with:
+          checkmarx_url: ${{ secrets.CHECKMARX_URL }}
+          checkmarx_version: "9.7"
+          checkmarx_username: ${{ secrets.CHECKMARX_USERNAME }}
+          checkmarx_password: ${{ secrets.CHECKMARX_PASSWORD }}
+          checkmarx_client_secret: ${{ secrets.CHECKMARX_CLIENT_SECRET }}
+          team: ${{ secrets.CHECKMARX_TEAMS }}
+          project: ${{ github.repository }}
+          extra_certificates: certificates      # only if CxSAST uses a self-signed cert
+          scanners: sast, sca
+          bug_tracker: Jira
+          break_build: true
+
+          # SCA credentials
+          sca_username: ${{ secrets.SCA_USERNAME }}
+          sca_password: ${{ secrets.SCA_PASSWORD }}
+          sca_tenant: ${{ secrets.SCA_TENANT }}
+
+          # Jira
+          jira_url: ${{ secrets.JIRA_URL }}
+          jira_username: ${{ secrets.JIRA_USERNAME }}
+          jira_token: ${{ secrets.JIRA_TOKEN }}
+          jira_project: ${{ secrets.JIRA_PROJECT }}
+          jira_issue_type: "Bug"
+          jira_open_status: "Backlog, Selected for Development, In Progress"
+          jira_closed_status: "Done"
+          jira_open_transition: "In Progress"
+          jira_close_transition: "Done"
+
+          params: >-
+            --cx-flow.zip-exclude=\.git/.*,\.github/.*
+            --namespace=${{ github.repository_owner }}
+            --repo-name=${{ github.event.repository.name }}
+            --branch=${{ github.ref_name }}
+            --severity=High,Critical
