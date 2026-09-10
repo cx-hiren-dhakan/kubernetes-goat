@@ -7,7 +7,7 @@ on:
 
 jobs:
   cxflow-scan:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: write
@@ -17,39 +17,67 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Checkmarx CxFlow Action
+        # You may pin to the exact commit or the version.
+        # uses: checkmarx-ts/checkmarx-cxflow-github-action@bfcb4817aadf2f63c9665ad901acfabd2410976e
         uses: checkmarx-ts/checkmarx-cxflow-github-action@v2.3
         with:
-          checkmarx_url: ${{ secrets.CHECKMARX_URL }}
-          checkmarx_version: "9.7"
-          checkmarx_username: ${{ secrets.CHECKMARX_USERNAME }}
-          checkmarx_password: ${{ secrets.CHECKMARX_PASSWORD }}
-          checkmarx_client_secret: ${{ secrets.CHECKMARX_CLIENT_SECRET }}
-          team: ${{ secrets.CHECKMARX_TEAMS }}
-          project: ${{ github.repository }}
-          extra_certificates: certificates      # only if CxSAST uses a self-signed cert
-          scanners: sast, sca
-          bug_tracker: Jira
-          break_build: true
-
-          # SCA credentials
-          sca_username: ${{ secrets.SCA_USERNAME }}
-          sca_password: ${{ secrets.SCA_PASSWORD }}
-          sca_tenant: ${{ secrets.SCA_TENANT }}
-
-          # Jira
-          jira_url: ${{ secrets.JIRA_URL }}
-          jira_username: ${{ secrets.JIRA_USERNAME }}
-          jira_token: ${{ secrets.JIRA_TOKEN }}
-          jira_project: ${{ secrets.JIRA_PROJECT }}
-          jira_issue_type: "Bug"
-          jira_open_status: "Backlog, Selected for Development, In Progress"
-          jira_closed_status: "Done"
-          jira_open_transition: "In Progress"
-          jira_close_transition: "Done"
-
-          params: >-
-            --cx-flow.zip-exclude=\.git/.*,\.github/.*
-            --namespace=${{ github.repository_owner }}
-            --repo-name=${{ github.event.repository.name }}
-            --branch=${{ github.ref_name }}
-            --severity=High,Critical
+          # Provide Checkmarx URL
+          checkmarx_url: ${{ secrets.CHECKMARX_URL }} # default is 
+          # Select a Checkmarx Team
+          team: ${{ secrets.CHECKMARX_TEAMS }} # default is /CxServer/SP/Company
+          # Provide Checkmarx Username
+          checkmarx_username: ${{ secrets.CHECKMARX_USERNAME }} # default is 
+          # Provide Checkmarx Password
+          checkmarx_password: ${{ secrets.CHECKMARX_PASSWORD }} # default is 
+          # Provide Checkmarx Client Secret
+          checkmarx_client_secret: ${{ secrets.CHECKMARX_CLIENT_SECRET }} # default is 
+          # Select a Checkmarx Project
+          project: ${{ github.repository }} # default is 
+          # Select a Checkmarx Preset
+          preset: ASA Premium # optional, default is High and Medium
+          # Break build based on Checkmarx findings?
+          break_build: true # optional
+          # Bug tracker for the scan results.
+          bug_tracker: Jira # optional, default is Sarif
+          # Incremental Scans?
+          incremental: false # optional, default is true
+          # Additional CLI parameters
+          params: # optional, default is 
+          # GitHub API Token
+          github_token: # optional, default is ${{ github.token }}
+          # Vulnerability Scanners (sast, sca)
+          scanners: Sast, Sca # default is 
+          # Subdirectory containing extra X509 certificate files (.crt) to be imported into the CxFlow JRE. Example: \"certificates\"
+          extra_certificates: # optional, default is 
+          # Provide SCA API URL
+          sca_api_url: # optional, default is https://api.scacheckmarx.com
+          # Provide SCA APP URL
+          sca_app_url: # optional, default is https://sca.scacheckmarx.com
+          # Provide SCA Access Control URL
+          sca_access_control_url: # optional, default is https://platform.checkmarx.net
+          # Provide SCA Tenant
+          sca_tenant: ${{ secrets.SCA_TENANT }} # optional, default is 
+          # Provide SCA Username
+          sca_username: ${{ secrets.SCA_USERNAME }} # optional, default is 
+          # Provide SCA Password
+          sca_password: ${{ secrets.SCA_PASSWORD }} # optional, default is 
+          # Java options will be passed to java
+          java_opts: # optional, default is -XX:MaxRAMPercentage=75.0
+          # Jira URL
+          jira_url: ${{ secrets.JIRA_URL }} # optional, default is 
+          # Jira Username
+          jira_username: ${{ secrets.JIRA_USERNAME }} # optional, default is 
+          # Jira Token
+          jira_token: ${{ secrets.JIRA_TOKEN }} # optional, default is 
+          # Jira Project
+          jira_project: ${{ secrets.JIRA_PROJECT }} # optional, default is 
+          # Jira Issue Type
+          jira_issue_type: "Bug" # optional, default is 
+          # Jira Open Transition
+          jira_open_transition: "In Progress" # optional, default is 
+          # Jira Close Transition
+          jira_close_transition: "Done" # optional, default is 
+          # Jira Open Status
+          jira_open_status: "Backlog,Selected for Development,In Progress" # optional, default is 
+          # Jira Closed Status
+          jira_closed_status: "Done" # optional, default is 
